@@ -3,15 +3,27 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0"
-  }
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.1",
+    "multer": "^2.0.1",
+    "nodemailer": "^7.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ademola7/osedebooks-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ademola7/osedebooks-backend/issues"
+  },
+  "homepage": "https://github.com/Ademola7/osedebooks-backend#readme",
+  "description": ""
 }
