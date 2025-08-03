@@ -7,7 +7,21 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+//cors
+const allowedOrigins = ["https://osedebooks.com", "https://www.osedebooks.com"];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,23 +42,40 @@ const transporter = nodemailer.createTransport({
 });
 
 // Newsletter route
+// Newsletter route (updated)
 app.post("/subscribe", async (req, res) => {
   const { name, email } = req.body;
 
-  const mailOptions = {
+  if (!name || !email) {
+    return res
+      .status(400)
+      .json({ message: "Both name and email are required." });
+  }
+
+  // 1. Send confirmation to user
+  const userMailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
     subject: "Thanks for Subscribing!",
-    text: `Hi ${
-      name || "Reader"
-    },\n\nThank you for subscribing. Kindly confirm your email by replying to this mail.`,
+    text: `Hi ${name},\n\nThank you for subscribing to Osede Books. Stay tuned for offers, updates, and exciting news!\n\nWarm regards,\nOsede Books Team`,
+  };
+
+  // 2. Notify Admin
+  const adminMailOptions = {
+    from: process.env.EMAIL_USER,
+    to: process.env.ADMIN_EMAIL,
+    subject: "New Newsletter Subscriber",
+    text: `New subscriber:\n\nName: ${name}\nEmail: ${email}`,
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({ message: "Confirmation email sent!" });
+    await transporter.sendMail(userMailOptions);
+    await transporter.sendMail(adminMailOptions);
+
+    res.status(200).json({ message: "Subscription successful!" });
   } catch (err) {
-    res.status(500).json({ message: "Failed to send email", error: err });
+    console.error("Newsletter error:", err);
+    res.status(500).json({ message: "Subscription failed", error: err });
   }
 });
 
