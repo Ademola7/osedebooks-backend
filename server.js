@@ -42,7 +42,6 @@ const transporter = nodemailer.createTransport({
 });
 
 // Newsletter route
-// Newsletter route (updated)
 app.post("/subscribe", async (req, res) => {
   const { name, email } = req.body;
 
@@ -79,6 +78,44 @@ app.post("/subscribe", async (req, res) => {
   }
 });
 
+// Contact
+
+app.post("/contact", async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  const mailOptionsToAdmin = {
+    from: process.env.EMAIL_USER,
+    to: process.env.ADMIN_EMAIL,
+    subject: "New Contact Message from Osede Books",
+    html: `
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Message:</strong><br>${message}</p>
+    `,
+  };
+
+  const autoReplyToUser = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "We received your message",
+    text: `Hi ${name},\n\nThank you for contacting Osede Books. We'll get back to you shortly.\n\nBest regards,\nOsede Books Team`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptionsToAdmin);
+    await transporter.sendMail(autoReplyToUser); // optional but nice UX
+
+    res.status(200).json({ message: "Message sent successfully." });
+  } catch (err) {
+    console.error("Contact form error:", err);
+    res.status(500).json({ message: "Failed to send message.", error: err });
+  }
+});
+
 // Manuscript submission route
 app.post(
   "/submit-manuscript",
@@ -91,7 +128,7 @@ app.post(
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: email,
+      to: email, // recipient
       subject: "Manuscript Received",
       text: `Hi ${name},\n\nWe have received your manuscript titled "${file.originalname}". Thank you for submitting to OSEDE Books.`,
       attachments: [{ path: file.path }],
