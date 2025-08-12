@@ -2,6 +2,9 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const multer = require("multer");
 const cors = require("cors");
+const mysql = require("mysql2");
+const connection = require("./db");
+
 require("dotenv").config();
 
 const app = express();
@@ -9,6 +12,19 @@ const port = process.env.PORT || 3000;
 
 //cors
 const allowedOrigins = ["https://osedebooks.com", "https://www.osedebooks.com"];
+
+// MySQL connection
+const db = mysql.createConnection({
+  host: "caixq00js.mysql.service.one.com",
+  user: "caixq00js_osedebooks",
+  password: process.env.dbpassword,
+  database: "caixq00js_osedebooks",
+});
+
+db.connect((err) => {
+  if (err) throw err;
+  console.log("MySQL Connected...");
+});
 
 app.use(
   cors({
